@@ -1,0 +1,12 @@
+Host: www.fedstat.ru
+User-Agent: Mozilla/5.0 (X11; Linux i686; rv:60.0) Gecko/20100101 Firefox/60.0
+Accept: application/json, text/javascript, */*; q=0.01
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br
+Referer: https://www.fedstat.ru/indicator/43007
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+X-Requested-With: XMLHttpRequest
+DNT: 1
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
