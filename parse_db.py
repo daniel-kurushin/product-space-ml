@@ -12,16 +12,17 @@ for sheet_name in bd2009_2019.sheet_names():
         region = {}
         for col in range(3, sheet.ncols):
             industry = {}
-            for row in range(2, sheet.nrows):
+            for row in range(1, sheet.nrows):
                 x = sheet.cell(row,col).value
+                x = x if x else 0
                 try:
                     industry_name = sheet.cell(row,1).value
                     assert re.match(r'.*[а-я]+.*', industry_name)
-                except AssertionError:
+                except (AssertionError, TypeError):
                     industry_name = sheet.cell(row,0).value
                 industry_name = industry_name.strip()
                 industry.update({industry_name: x})
-            region_name = sheet.cell(1,col).value
+            region_name = sheet.cell(0,col).value
             region.update({region_name:industry})
         year = sheet_name
         out.update({year:region})            
