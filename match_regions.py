@@ -1,10 +1,13 @@
-from requests import get
+import re
+
+from requests import get, post
 from bs4 import BeautifulSoup
 from rutermextract import TermExtractor
-from utilites import load
+from utilites import load, dump
 import numpy as np
 from itertools import product
 from utilites import compare_phrase as compare_terms
+from time import sleep
 
 stopterms = {'республика', 'город', 'край'}
 
@@ -14,46 +17,64 @@ region_list = []
 industry_list = []
 te = TermExtractor()
 
+try:    
+    region_terms = load('region_terms.json')
+except FileNotFoundError:
+    region_terms = {}
+
+def get_region_description(region_name):
+    def is_russian(term):
+        try:
+            rez = re.match(r'[а-яё ]+', term).group() == term
+        except AttributeError as e:
+            rez = 0
+        return rez
+    
+    try:
+        rez = region_terms[region_name]
+    except KeyError:
+        sleep(.5)
+        x = post(
+            'https://html.duckduckgo.com/html/', 
+            data={'q':region_name.replace(' ', '+')}, 
+            headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:32.0) Gecko/20100101 Firefox/32.0',}
+        ).content
+        x = BeautifulSoup(x).text
+        rez = [
+            t for t in te(x, strings=1) if t.count(' ') > 0 and t not in stopterms and is_russian(t)
+        ]
+        region_terms.update({region_name:rez})
+        dump(region_terms, 'region_terms.json')
+    return tuple(rez)
+
+
 for year in data.keys():
     for region in data[year].keys():
         region_list += [region]
         for industry in data[year][region].keys():
             industry_list += [industry]
             
-industry_set = set(industry_list)
 region_set = set(region_list)
+
 
 regions = {}
 for region in region_set:
-    regterms = tuple(set(te(region, strings=1)) - stopterms)
-    regions.update({regterms:region})
+    regions.update({get_region_description(region):region})
     
 rez = np.zeros((len(regions), len(regions)))
+idx = list(product(range(len(regions)), range(len(regions))))
+n = 0
 
-i = 0
-for region_a in regions:
-    j = 0
+a_list = regions.keys()
 
-    for region_b in regions:
-        n, weight = 0, 0
-        for a, b in product(region_a, region_b):
-            print(a, b, compare_terms(a, b))
-            v = ( compare_terms(a, b) + compare_terms(a, b) ) / 2
-            if v > 0.01:
-                weight += v
-                n += 1
-        rez[i,j] = weight / n if n > 0 else 0
-        j += 1
-        
-    i += 1
-
+for a, b in product(a_list, a_list):
+    v = ( compare_terms(a, b) + compare_terms(a, b) ) / 2
+    i, j = idx[n]
+    rez[i,j] = v
+    n += 1
+    
 for i in range(len(regions)):
     _min = min(rez[i])
     _max = max(rez[i] - _min)
     rez[i] = (rez[i] - _min) / _max if _max else 0
     
-region_names = list(regions)
-
-for i in range(len(regions)):
-    n = np.argmax(rez[i])    
-    print(region_names[i], region_names[n], rez[i][n])
