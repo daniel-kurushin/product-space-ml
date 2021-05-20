@@ -31,9 +31,10 @@ def get_region_description(region_name):
         return rez
     
     try:
-        rez = region_terms[region_name]
-    except KeyError:
-        sleep(.5)
+        rez = region_terms[region_name]        
+        assert rez
+    except (KeyError, AssertionError):
+        sleep(60)
         x = post(
             'https://html.duckduckgo.com/html/', 
             data={'q':region_name.replace(' ', '+')}, 
