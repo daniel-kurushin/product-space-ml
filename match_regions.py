@@ -1,6 +1,6 @@
 import re
 
-from requests import get, post
+from requests import post
 from bs4 import BeautifulSoup
 from rutermextract import TermExtractor
 from utilites import load, dump
