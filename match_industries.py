@@ -32,14 +32,17 @@ def get_industry_description(industry_name):
     
     try:
         rez = industry_terms[industry_name]
-    except KeyError:
+        assert rez
+    except (KeyError, AssertionError):
         sleep(.5)
         x = post(
             'https://html.duckduckgo.com/html/', 
-            data={'q':industry_name}, 
+            data={'q':industry_name.replace(' ', '+')}, 
             headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:32.0) Gecko/20100101 Firefox/32.0',}
         ).content
-        x = BeautifulSoup(x).text
+        dom = BeautifulSoup(x)
+        x = dom.text
+        open('/tmp/%s.html' % industry_name[0:30], 'w').write(dom.prettify())
         rez = [
             t for t in te(x, strings=1) if t.count(' ') > 0 and t not in stopterms and is_russian(t)
         ]
