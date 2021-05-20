@@ -34,7 +34,7 @@ def get_industry_description(industry_name):
         rez = industry_terms[industry_name]
         assert rez
     except (KeyError, AssertionError):
-        sleep(5)
+        sleep(60)
         x = post(
             'https://html.duckduckgo.com/html/', 
             data={'q':industry_name.replace(' ', '+')}, 
