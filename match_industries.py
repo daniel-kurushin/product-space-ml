@@ -54,9 +54,9 @@ for year in data.keys():
     for region in data[year].keys():
         region_list += [region]
         for industry in data[year][region].keys():
-            industry_list += [industry]
+            industry_list += [' '.join(industry.split())]
             
-industry_set = set(industry_list)
+industry_set = sorted(set(industry_list))
 
 
 industries = {}
@@ -80,3 +80,21 @@ for i in range(len(industries)):
     _max = max(rez[i] - _min)
     rez[i] = (rez[i] - _min) / _max if _max else 0
     
+
+b_list = list(industries.values())
+
+open('/tmp/out.csv', 'w').write('^'.join([''] + b_list) + '\n')
+for i in range(len(rez)):
+    open('/tmp/out.csv', 'a').write('^'.join([b_list[i]] + [ str(round(x, 4)).replace('.',',') for x in rez[i] ]) + '\n')
+    
+
+rez[rez==1] = 0
+n = 0
+pairs = []
+for industry in industry_set:
+    k = np.argmax(rez[n])
+    w = rez[n, k]
+    if w > 0.75:
+        to_pair = industry_set[k]
+        pairs += [(industry, to_pair, w)]
+    n += 1

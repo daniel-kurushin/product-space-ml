@@ -51,7 +51,7 @@ def get_region_description(region_name):
 
 for year in data.keys():
     for region in data[year].keys():
-        region_list += [region]
+        region_list += [' '.join(region.split())]
         for industry in data[year][region].keys():
             industry_list += [industry]
             
@@ -67,6 +67,7 @@ idx = list(product(range(len(regions)), range(len(regions))))
 n = 0
 
 a_list = regions.keys()
+b_list = list(regions.values())
 
 for a, b in product(a_list, a_list):
     v = ( compare_terms(a, b) + compare_terms(a, b) ) / 2
@@ -74,8 +75,23 @@ for a, b in product(a_list, a_list):
     rez[i,j] = v
     n += 1
     
-for i in range(len(regions)):
+for i in range(len(a_list)):
     _min = min(rez[i])
     _max = max(rez[i] - _min)
     rez[i] = (rez[i] - _min) / _max if _max else 0
+    
+open('/tmp/out.csv', 'w').write('^'.join([''] + b_list) + '\n')
+for i in range(len(rez)):
+    open('/tmp/out.csv', 'a').write('^'.join([b_list[i]] + [ str(round(x, 4)).replace('.',',') for x in rez[i] ]) + '\n')
+    
+rez[rez==1] = 0
+n = 0
+pairs = []
+for region in b_list:
+    k = np.argmax(rez[n])
+    w = rez[n, k]
+    if w > 0:
+        to_pair = b_list[k]
+        pairs += [(region, to_pair, w)]
+    n += 1
     
