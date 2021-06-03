@@ -42,4 +42,4 @@ from utilites import dump
 
 dump(out, 'data/BD2009-2019.json')
 
-dump(mapping_table, 'data/mapping_table.json')
+dump(mapping_table, 'data/mapping_table_b.json')
