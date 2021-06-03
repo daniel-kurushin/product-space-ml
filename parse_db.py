@@ -27,8 +27,19 @@ for sheet_name in bd2009_2019.sheet_names():
         year = sheet_name
         out.update({year:region})            
     except ValueError:
-        pass
+        if sheet_name == "Таблица сопоставления":
+            sheet = bd2009_2019.sheet_by_name(sheet_name)
+            mapping_table = {}
+            for row in range(2, sheet.nrows):
+                k, v = [ " ".join(x.strip().lower().split()) for x in [ sheet.cell(row,1).value, sheet.cell(row,2).value] ]
+                mapping_table.update({k:v})
+                mapping_table.update({v:k})
+            
+    
+            
 
 from utilites import dump
 
 dump(out, 'data/BD2009-2019.json')
+
+dump(mapping_table, 'data/mapping_table.json')
