@@ -33,3 +33,4 @@ for year in data:
             rez[year].update({r:{}})
             rez[year][r].update({i:v})
             
+dump(rez, 'data/normalized_table.json')
