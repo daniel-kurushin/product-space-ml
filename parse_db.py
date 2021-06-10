@@ -1,7 +1,7 @@
 import re
 from xlrd import open_workbook
 
-bd2009_2019 = open_workbook('data/БД2009-2019.xls')
+bd2009_2019 = open_workbook('data/БД2009-2019.a.xls')
 
 out = {}
 
@@ -10,7 +10,7 @@ for sheet_name in bd2009_2019.sheet_names():
         int(sheet_name)
         sheet = bd2009_2019.sheet_by_name(sheet_name)
         region = {}
-        for col in range(3, sheet.ncols):
+        for col in range(2, sheet.ncols):
             industry = {}
             for row in range(1, sheet.nrows):
                 x = sheet.cell(row,col).value
@@ -20,9 +20,9 @@ for sheet_name in bd2009_2019.sheet_names():
                     assert re.match(r'.*[а-я]+.*', industry_name)
                 except (AssertionError, TypeError):
                     industry_name = sheet.cell(row,0).value
-                industry_name = industry_name.strip()
+                industry_name = " ".join(industry_name.strip().lower().split())
                 industry.update({industry_name: x})
-            region_name = sheet.cell(0,col).value
+            region_name = " ".join(sheet.cell(0,col).value.strip().lower().split())
             region.update({region_name:industry})
         year = sheet_name
         out.update({year:region})            
