@@ -29,6 +29,9 @@ years = data.keys()
 def sigma_p(x):
     return 1 if x >= 1 else 0
 
+def sigma_p_region(x, region, Ss):
+    return 1 if x >= 1 and region in Ss else 0
+
 def sigma(x):
     from math import exp
     return 1 / (1 + exp(-x))
@@ -90,6 +93,38 @@ for year in years:
             
 dump(LQ, 'data/LQ.json')
 
+S = {}
+for year in years:
+    regions = data[year]
+    S.update({year:{}})
+    for region in regions:
+        industries = data[year][region]
+        S[year].update({region:{}})
+        for industry in industries:
+            B2  = data[year][region][industry]
+            A = sum_by_industry[year][industry]
+            v = B2 / A
+            S[year][region].update({industry:v})
+            
+dump(S, 'data/S.json')
+
+Ss = {}
+for year in years:
+    Ss.update({year:{}})
+    for industry in industries:
+        X = []
+        x = 0
+        Ss[year].update({industry:{}})
+        while x < 0.80:
+            max_r = ("", 0)
+            for region in [ x for x in regions if x not in [y[0] for y in X ] ]:
+                if S[year][region][industry] > max_r[1]:
+                    max_r = (region, S[year][region][industry])
+            X += [max_r] 
+            x = sum([x[1] for x in X])
+        Ss[year].update({industry:[ x[0] for x in X]})
+
+dump(Ss, 'data/Ss.json')
 #kLQ = {}
 #for region in regions:
 #    kLQ.update({region:{}})
@@ -124,7 +159,7 @@ for year in LQ:
         M[year].update({region:{}})
         for industry in industries:
             B12 = LQ[year][region][industry]
-            v = sigma_p(B12)
+            v = sigma_p_region(B12, region, Ss[year][industry])
             M[year][region].update({industry:v})
             
 dump(M, 'data/M.json')
