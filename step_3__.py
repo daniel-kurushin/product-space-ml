@@ -52,7 +52,7 @@ def diag_diversity(diversity):
         j, k = 0, 0
         for region in regions:
             v = diversity[year][region]
-            rez[i,j,k] = v if v > 0 else 100000
+            rez[i,j,k] = v if v > 0 else 0.0001
             j += 1
             k += 1
         i += 1
@@ -94,6 +94,7 @@ for M in [MM]:
         m0 = 'город москва столица российской федерации город федерального значения'
         m1 = 'город федерального значения севастополь'
         m2 = 'республика крым'
+#        print(year, [ x[1].real for x in test if x[0] == m0], [ x[1].real for x in test if x[0] == m1], [ x[1].real for x in test if x[0] == m2])
         print(year, [ x[1] for x in test if x[0] == m0], [ x[1] for x in test if x[0] == m1], [ x[1] for x in test if x[0] == m2])
         i += 1
 
