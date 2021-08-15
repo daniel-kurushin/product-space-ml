@@ -7,6 +7,8 @@ from nltk.tokenize import WordPunctTokenizer
 from itertools import product
 from math import tanh
 
+wpt = WordPunctTokenizer()
+
 def load(filename):
     filetype = filename.split('.')[-1]
     try:
@@ -38,7 +40,6 @@ CL - список кластеров
 idx - имена нод
 """
 def graph(LM, WM, CL, idx, filename, subgraphs = False):
-    wpt = WordPunctTokenizer()
     f = open(filename, 'w')
     f.write('digraph a {\n')
     n = 0

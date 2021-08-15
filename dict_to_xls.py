@@ -21,7 +21,6 @@ def dict_to_xls(filename = 'out.xlsx',
     levels += [sorted(list(IN.keys()))]
     levels += [sorted(list(IN[levels[0][0]].keys()))]
     levels += [sorted(list(IN[levels[0][0]][levels[1][0]].keys()))]
-    print(levels[1])
     sheetnames = {}
     for key0 in levels[structure['sheets']]:
         sheetnames.update(shorter(key0))
@@ -31,7 +30,6 @@ def dict_to_xls(filename = 'out.xlsx',
             ws.write(0, i, key1)
             j = 1
             for key2 in levels[structure['rows']]:
-                print(key2, key0, key1)
                 ws.write(j, i, IN[key0][key1][key2])
                 j += 1
             i += 1
@@ -42,7 +40,8 @@ def dict_to_xls(filename = 'out.xlsx',
     
     
     wb.save(filename)
-    
-data = load('data/normalized_table.json')
 
-dict_to_xls('/tmp/out.xlsx', data, {'sheets':0,'columns':1, 'rows':2})
+if __name__ == "__main__":    
+    data = load('data/normalized_table.json')
+
+    dict_to_xls('/tmp/out.xlsx', data, {'sheets':0,'columns':1, 'rows':2})
