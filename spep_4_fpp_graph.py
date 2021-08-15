@@ -157,6 +157,7 @@ for year in years:
 years = ['2009', '2019']
 
 for year in years:
+    nodes = set(Fpp[year'].keys())
     edges = []
     for industry_a in industries:
         for industry_b in industries:
@@ -165,7 +166,13 @@ for year in years:
             if (w, a, b) not in edges:
                 edges += [(w, a, b)]
 
-edges = sorted(edges)
+    edges = sorted(edges)
+
+    subgraph = edges[-1]
+    subnodes = set(edges[-1][1:])
+    while nodes - subnodes:
+        a https://habr.com/ru/post/569444/
+    
 
 ########################3
 """
