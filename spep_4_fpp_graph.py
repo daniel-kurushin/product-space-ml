@@ -154,10 +154,8 @@ for year in years:
             if Fpp[year][industry_a][industry_b] < min_value:
                 Fpp[year][industry_a][industry_b] = 0
                 
-years = ['2009', '2019']
-
 for year in years:
-    nodes = set(Fpp[year'].keys())
+    nodes = set(Fpp[year].keys())
     edges = []
     for industry_a in industries:
         for industry_b in industries:
@@ -168,15 +166,25 @@ for year in years:
 
     edges = sorted(edges)
 
-    subgraph = edges[-1]
+    subgraph = [edges[-1]]
     subnodes = set(edges[-1][1:])
     while nodes - subnodes:
-        a https://habr.com/ru/post/569444/
-    
+        a, b = [ (x[1], x[2]) for x in edges if (x[1] in subnodes and x[2] not in subnodes) or (x[2] in subnodes and x[1] not in subnodes)][-1]
+        edge_to_add = sorted([ x for x in edges if (x[1:] == (a, b)) or (x[1:] == (b, a)) ])[-1]
+        subnodes |= set((a,b))
+        subgraph += [edge_to_add]
 
-########################3
+    graph = "digraph g {\n\trankdir=LR\n"
+    for edge in subgraph:
+        a = wrap(wpt, edge[1])
+        b = wrap(wpt, edge[2])
+        c = int(12 * Fpp[year][edge[1]][edge[2]] + 1)
+        graph += '\t"%s" -> "%s" [dir=none, penwidth=%s]\n' % (a, b, c)
+    graph += "}\n"
+        
+    open('/tmp/graph.%s.dot' % year, 'w').write(graph)
+    
 """
-    graph = "digraph g {\n"
     for industry_a in industries:
         for industry_b in industries:
             if industry_a != industry_b and \
@@ -187,9 +195,5 @@ for year in years:
                  c = 1 # int(13 * Fpp[year][industry_a][industry_b] - 0.3)
                  graph += '\t"%s" -> "%s" [penwidth=%s]\n' % (a, b, c)
                  pairs += [(industry_b,industry_a)]
-    
-    graph += "}\n"
-        
-    open('/tmp/graph.%s.dot' % year, 'w').write(graph)
     
 """
