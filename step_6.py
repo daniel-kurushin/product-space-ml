@@ -2,21 +2,46 @@ from utilites import load, dump
 from xlrd import open_workbook
 
 complexity = load('data/complexity.json')
+regions = list(complexity.keys())
 
-neib85 = open_workbook('data/neib85.xls')
+region_to_region = load('data/region-to-region.json')
 
-neib = {}
+neib85 = open_workbook('data/neib85.xls').sheet_by_index(0)
+cluster_data = open_workbook('data/cluster_in_data.xlsx').sheet_by_index(0)
 
-neibs = neib85.sheet_by_name('neibs')
-excel_regions = [ neibs.cell(0,col).value.lower() for col in range(1, neibs.ncols)]
-real_regions = list(complexity.keys())
 
-for region in real_regions:
-    print(excel_regions.index(region))
-#for :
-#    
-#    year = int(sheet.cell(0,col).value)
-#    out.update({year:{}})
-#    for row in range(1, sheet.nrows):
-#        region = sheet.cell(row,0).value
-#        out[year].update({region: sheet.cell(row,col).value})
+def get_reg_name(x):
+    try:
+        regname = region_to_region[x]
+    except KeyError:
+        assert x in regions
+        regname = x
+    return regname
+
+M = {}
+
+for row in range(1, neib85.nrows):
+    for col in range(1, neib85.ncols):
+        a, b = [ region_to_region[x.lower()] for x in [neib85.cell(col, 0).value, neib85.cell(0, row).value]]
+        key = (a, b)
+        if neib85.cell(col, row).value:
+            M.update({key:1})
+            
+N = {}
+            
+for row in range(1, cluster_data.nrows):
+    regname = get_reg_name(cluster_data.cell(row, 0).value.lower().strip())
+    ind_parks =         int(cluster_data.cell(row, 1).value)
+    cluster_in_region = int(cluster_data.cell(row, 2).value)
+    sp_econ_zone =      int(cluster_data.cell(row, 3).value)
+    
+    N.update({
+        regname:
+            {
+                "индустриальные парки": ind_parks,
+                "наличие кластера" : cluster_in_region,
+                "особая экономическая зона" : sp_econ_zone,
+
+            }
+        }
+    )

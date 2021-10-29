@@ -36,5 +36,7 @@ for year in years:
     T_m = 0
     for region in regions:
         Y_r = out[year][region]
-        T_m += (Y_r / Y) * log(Y_r/(Y/R))
+        v = (Y_r / Y) * log(Y_r/(Y/R))
+        print(region, v)
+        T_m += v
     print(year, T_m)
