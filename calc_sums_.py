@@ -2,6 +2,7 @@ import numpy as np
 
 from utilites import load, dump
 from copy import deepcopy
+from voc import voc
 
 data = load('data/normalized_table.json')
 
@@ -36,6 +37,9 @@ def sigma(x):
     from math import exp
     return 1 / (1 + exp(-x))
 
+def filter_industries(industries):
+    return [ x for x in industries if voc[x] != '🚫' ]
+
 years_to_calc = years
 #years_to_calc[-1] = 2010
 
@@ -56,15 +60,14 @@ for year in years:
     for region in regions:
         sum_by_region[year].update({region:0})
         industries = data[year][region]
-        for industry in industries:
+        for industry in filter_industries(industries):
             sum_by_region[year][region] += data[year][region][industry]
 
-    for industry in industries:
+    for industry in (industries):
         sum_by_industry[year].update({industry:0})
         for region in regions:
             sum_by_industry[year][industry] += data[year][region][industry]
             
-
 for year in years:
     sum_by_region_total.update({year:0})
     regions = sum_by_region[year]
@@ -78,7 +81,7 @@ for year in years:
     for region in regions:
         industries = data[year][region]
         LQ[year].update({region:{}})
-        for industry in industries:
+        for industry in filter_industries(industries):
             B2  = data[year][region][industry]
             _E2 = sum_by_region[year][region]
             B_8 = sum_by_industry[year][industry]
@@ -100,7 +103,7 @@ for year in years:
     for region in regions:
         industries = data[year][region]
         S[year].update({region:{}})
-        for industry in industries:
+        for industry in filter_industries(industries):
             B2  = data[year][region][industry]
             A = sum_by_industry[year][industry]
             v = B2 / A
@@ -111,7 +114,7 @@ dump(S, 'data/S.json')
 Ss = {}
 for year in years:
     Ss.update({year:{}})
-    for industry in industries:
+    for industry in filter_industries(industries):
         X = []
         x = 0
         Ss[year].update({industry:{}})
@@ -162,7 +165,7 @@ for year in LQ:
     for region in regions:
         industries = LQ[year][region]
         M[year].update({region:{}})
-        for industry in industries:
+        for industry in filter_industries(industries):
             B12 = LQ[year][region][industry]
             v = sigma_p_region(B12, region, Ss[year][industry])
             M[year][region].update({industry:v})
@@ -176,7 +179,7 @@ for year in M:
     ubiquity.update({year:{}})
     for region in regions:
         industries = M[year][region]
-        for industry in industries:
+        for industry in filter_industries(industries):
             try:
                 ubiquity[year][industry] += M[year][region][industry]
             except KeyError:
@@ -189,7 +192,7 @@ diversity = {}
 for year in M:
     diversity.update({year:{}})
     for region in regions:
-        for industry in industries:
+        for industry in filter_industries(industries):
             try:
                 diversity[year][region] += M[year][region][industry]
             except KeyError:
