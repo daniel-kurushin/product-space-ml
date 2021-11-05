@@ -1,4 +1,4 @@
-from utilites import load
+from utilites import load, dump
 from voc import voc
 
 M = load('data/M_.json')
@@ -34,6 +34,7 @@ for year in years:
             
             Fpp[year][industry_a][industry_b] = s / max(k_p_0[year][industry_a], k_p_0[year][industry_b])
         
+dump(Fpp, 'data/Fpp.json')
 
 for year in years:
     for industry in industries:
