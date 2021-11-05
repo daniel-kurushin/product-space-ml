@@ -137,7 +137,7 @@ def get_region_clusters(border_map, region_properties, sorted_regions):
         weight = sum(calc_neighbours_weight(neighbours) > 0)
         
         n = 0
-        while weight < 12 and n < 10:
+        while weight < 12 and n < 15:
             neighbours |= find_more_neighbours(neighbours, border_map, regions)
             weight = sum(calc_neighbours_weight(neighbours) > 0)
             n += 1
