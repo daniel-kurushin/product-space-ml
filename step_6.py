@@ -94,45 +94,68 @@ def get_region_clusters(border_map, region_properties, sorted_regions):
     def get_properties(region):
         return np.array([ region_properties[region][x][0] for x in region_properties[region] ])
     
-    def find_more_neighbours(current_neighbours, border_map):
-        rez = set()
+    def get_neighbours_complexity(current_neighbours):
+        rez = 1
         for neighbour in current_neighbours:
-            rez |= set(border_map[neighbour])
+            rez *= complexity[neighbour]
+        return np.sqrt(rez)
+    
+    def find_more_neighbours(current_neighbours, border_map, regions):
+        
+        rez = set()
+        a = sum(calc_neighbours_weight(current_neighbours))
+        c = get_neighbours_complexity(current_neighbours)
+        
+        for neighbour in current_neighbours:
+            for region in border_map[neighbour]:
+                if region in regions:
+                    b = sum(calc_neighbours_weight(current_neighbours | {region}))
+                    d = get_neighbours_complexity(current_neighbours | {region})
+                    if b > a and d > c:
+                        open('/tmp/x_%s.dat' % sample,'a').write("%s\n" % b)
+                        a = b
+                        c = d
+                        rez |= {region}
         return rez
         
-    def calc_neighbours_weight(_neighbours, properties):
+    def calc_neighbours_weight(_neighbours):
         neighbours = _neighbours.copy()
         region = neighbours.pop()
-        rez = get_properties(region) > 0
+        rez = get_properties(region) 
         while neighbours:
             region = neighbours.pop()    
-            rez |= get_properties(region) > 0
-        return sum(rez)
+            rez += get_properties(region) 
+        return rez
     
     regions = [ x[0] for x in sorted_regions ]
     rez = {}
     
     while regions:
         sample = regions.pop()
+        print("Processing ", sample)
         neighbours = {sample}
-        weight = calc_neighbours_weight(neighbours, region_properties)
+        weight = sum(calc_neighbours_weight(neighbours) > 0)
         
         n = 0
         while weight < 12 and n < 10:
-            neighbours |= find_more_neighbours(neighbours, border_map)
-            weight = calc_neighbours_weight(neighbours, region_properties)
-            for neighbour in neighbours:
-                try:
-                    regions.pop(regions.index(neighbour))
-                except ValueError:
-                    pass
+            neighbours |= find_more_neighbours(neighbours, border_map, regions)
+            weight = sum(calc_neighbours_weight(neighbours) > 0)
             n += 1
 
+        for neighbour in neighbours:
+            try:
+                print("    Popping region ", neighbour, "...", end='')
+                regions.pop(regions.index(neighbour))
+                print("done")
+            except ValueError:
+                print("FAIL!")
+
         rez.update({sample:{
-                'состав кластера':list(neighbours),
+                'состав кластера':sorted(list(neighbours)),
                 'вес кластера': int(weight),
             }
         })
+        print("done")
         
     return rez
         
