@@ -31,7 +31,7 @@ R = len(out["2010"])
 
 from math import log
 
-for year in years:
+for year in ['2018']:
     Y = sum([ v for v in out[year].values() ])
     T_m = 0
     for region in regions:
