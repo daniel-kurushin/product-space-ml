@@ -194,6 +194,9 @@ def calc_T_between(region_clusters):
         v += Y_m / Y * log((Y_m / R_m) / (Y / R))
     return v
     
+def filter_bad_clusters(region_clusters):
+    pass
+
 border_map = get_region_border_map()
 region_properties = get_region_properties()
 sorted_regions = sort_regions_by_properties(region_properties)
@@ -201,6 +204,8 @@ sorted_regions = sort_regions_by_properties(region_properties)
 region_clusters = get_region_clusters(border_map, region_properties, sorted_regions)
 T_within = calc_T_within(region_clusters)
 T_between = calc_T_between(region_clusters)
+
+filtered_region_clusters = filter_bad_clusters(region_clusters)
 
 dump(region_clusters, 'data/clusters_out.json')
 
