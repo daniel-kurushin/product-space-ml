@@ -178,8 +178,8 @@ def calc_T_within(region_clusters):
     Y = sum([ grp[x] for x in grp ])
     v = 0
     for cluster in region_clusters:
-        T_m = region_clusters[cluster]["Индекс Тейла"]
-        Y_m = region_clusters[cluster]["Сумма ВРП по кластеру"]
+        T_m = region_clusters[cluster]["индекс Тейла"]
+        Y_m = region_clusters[cluster]["сумма ВРП по кластеру"]
         v += (T_m * Y_m) / Y
     return v
     
@@ -189,8 +189,8 @@ def calc_T_between(region_clusters):
     v = 0
     for cluster in region_clusters:
         R_m = len(region_clusters[cluster]['состав кластера'])
-        T_m = region_clusters[cluster]["Индекс Тейла"]
-        Y_m = region_clusters[cluster]["Сумма ВРП по кластеру"]
+        T_m = region_clusters[cluster]["индекс Тейла"]
+        Y_m = region_clusters[cluster]["сумма ВРП по кластеру"]
         v += Y_m / Y * log((Y_m / R_m) / (Y / R))
     return v
     
