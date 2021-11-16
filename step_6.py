@@ -30,7 +30,6 @@ def calc_theil_index(neighbours):
     for region in neighbours:
         Y_r = grp[region]
         v = (Y_r / Y) * log(Y_r/(Y/R))
-        print(region, v)
         T_m += v
     return T_m, Y
 
@@ -73,7 +72,7 @@ def get_region_properties():
     for row in range(1, cluster_data.nrows):
         regname = get_reg_name(cluster_data.cell(row, 0).value.lower().strip())
         
-        seaports                   = int(cluster_data.cell(row,  1).value) * 0.04
+        seaports                   = int(cluster_data.cell(row, 1).value) * 0.00
         airports                   = int(cluster_data.cell(row, 2).value) * 0.10
         we_transport_corridor      = int(cluster_data.cell(row, 3).value) * 0.08
         ns_transport_corridor      = int(cluster_data.cell(row, 4).value) * 0.08
@@ -140,18 +139,14 @@ def get_region_clusters(border_map, region_properties, sorted_regions):
         c = get_neighbours_complexity(current_neighbours)
         
         for neighbour in sorted(current_neighbours):
-            for region in [ x[0] for x in sorted(border_map[neighbour], key=lambda x:region_distance[(x[0], core)], reverse=1) ]:
+            for region in [ x[0] for x in sorted(border_map[neighbour], key=lambda x:region_distance[(x[0], core)], reverse=0) ]:
                 if region in regions:
                     b = sum(calc_neighbours_weight(current_neighbours | {region}))
-                    open('/tmp/log','a').write("%s, %s, %s \n" % (a, b, str(current_neighbours | {region})))
                     d = get_neighbours_complexity(current_neighbours | {region})
-                    open('/tmp/log','a').write("%s, %s, %s \n" % (c, d, str(current_neighbours | {region})))
-                    open('/tmp/log','a').write("%s > %s and %s > %s\n" % (b, a, d, c))
                     if b > a and d > c:
                         a = b
                         c = d
                         rez |= {region}
-                        open('/tmp/log','a').write("\t%s \n" % str(rez))
         return rez
         
     def calc_neighbours_weight(_neighbours):
@@ -173,10 +168,12 @@ def get_region_clusters(border_map, region_properties, sorted_regions):
         weight = sum(calc_neighbours_weight(neighbours) > 0)
         
         n = 0
-        while weight < 12 and n < 15:
+        while ( weight < 11 and n < 20 ) or n < 3:
             neighbours |= find_more_neighbours(sample, neighbours, border_map, regions)
             weight = sum(calc_neighbours_weight(neighbours) > 0)
             n += 1
+            T_m, Y_m = calc_theil_index(neighbours)
+            open('/tmp/log', 'a').write("%s %s\n" % (T_m, Y_m/10000000))
 
         for neighbour in neighbours:
             try:
