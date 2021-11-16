@@ -10,6 +10,19 @@ regions = list(complexity.keys())
 
 region_to_region = load('data/region-to-region.json')
 
+def load_region_distance():
+    dist = open_workbook('data/region_distance.xls').sheet_by_index(0)
+    
+    rez = {}
+    for row in range(1, dist.nrows):
+        for col in range(1, dist.ncols):
+            v = dist.cell(col, row).value
+            a = region_to_region[dist.cell(col, 0).value.lower()]
+            b = region_to_region[dist.cell(0, row).value.lower()]
+            
+            rez.update({(a,b):v, (b,a):v})
+    return rez
+
 def calc_theil_index(neighbours): 
     R = len(neighbours)
     Y = sum([ grp[r] for r in neighbours ])
@@ -29,19 +42,27 @@ def get_reg_name(x):
         regname = x
     return regname
 
+def get_region_distance(a, b):
+    a_0 = region_to_region(a)
+    b_0 = region_to_region(b)
+    b_i = region_distance_index.index(b_0)
+    v = region_distance[a_0][b_i]
+    return v
+
 def get_region_border_map():
-    neib85 = open_workbook('data/neib85.xls').sheet_by_index(0)
+    neib85 = open_workbook('data/neib85.a.xls').sheet_by_index(0)
     M = {}
     
     for row in range(1, neib85.nrows):
         for col in range(1, neib85.ncols):
             a, b = [ region_to_region[x.lower()] for x in [neib85.cell(col, 0).value, neib85.cell(0, row).value]]
             
-            if neib85.cell(col, row).value:
+            v = neib85.cell(col, row).value
+            if v:
                 try:
-                    M[a] += [b]
+                    M[a] += [(b, v)]
                 except KeyError:
-                    M.update({a:[b]})
+                    M.update({a:[(b, v)]})
     return M
        
 
@@ -112,21 +133,25 @@ def get_region_clusters(border_map, region_properties, sorted_regions):
             rez *= complexity[neighbour]
         return np.sqrt(rez)
     
-    def find_more_neighbours(current_neighbours, border_map, regions):
+    def find_more_neighbours(core, current_neighbours, border_map, regions):
         
         rez = set()
         a = sum(calc_neighbours_weight(current_neighbours))
         c = get_neighbours_complexity(current_neighbours)
         
-        for neighbour in current_neighbours:
-            for region in sorted(border_map[neighbour]):
+        for neighbour in sorted(current_neighbours):
+            for region in [ x[0] for x in sorted(border_map[neighbour], key=lambda x:region_distance[(x[0], core)], reverse=1) ]:
                 if region in regions:
                     b = sum(calc_neighbours_weight(current_neighbours | {region}))
+                    open('/tmp/log','a').write("%s, %s, %s \n" % (a, b, str(current_neighbours | {region})))
                     d = get_neighbours_complexity(current_neighbours | {region})
+                    open('/tmp/log','a').write("%s, %s, %s \n" % (c, d, str(current_neighbours | {region})))
+                    open('/tmp/log','a').write("%s > %s and %s > %s\n" % (b, a, d, c))
                     if b > a and d > c:
                         a = b
                         c = d
                         rez |= {region}
+                        open('/tmp/log','a').write("\t%s \n" % str(rez))
         return rez
         
     def calc_neighbours_weight(_neighbours):
@@ -149,7 +174,7 @@ def get_region_clusters(border_map, region_properties, sorted_regions):
         
         n = 0
         while weight < 12 and n < 15:
-            neighbours |= find_more_neighbours(neighbours, border_map, regions)
+            neighbours |= find_more_neighbours(sample, neighbours, border_map, regions)
             weight = sum(calc_neighbours_weight(neighbours) > 0)
             n += 1
 
@@ -197,6 +222,7 @@ def filter_bad_clusters(region_clusters):
     pass
 
 border_map = get_region_border_map()
+region_distance = load_region_distance()
 region_properties = get_region_properties()
 sorted_regions = sort_regions_by_properties(region_properties)
 
