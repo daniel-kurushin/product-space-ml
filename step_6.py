@@ -3,7 +3,7 @@ import numpy as np
 from utilites import load, dump
 from xlrd import open_workbook
 from math import log
-from data.grp2019 import grp
+from data.grp2019_ import grp, population
 
 complexity = load('data/complexity.json')
 regions = list(complexity.keys())
@@ -25,10 +25,10 @@ def load_region_distance():
 
 def calc_theil_index(neighbours): 
     R = len(neighbours)
-    Y = sum([ grp[r] for r in neighbours ])
+    Y = sum([ grp[r] for r in neighbours ]) / sum([ population[r] for r in neighbours ])
     T_m = 0
     for region in neighbours:
-        Y_r = grp[region]
+        Y_r = grp[region] / population[region]
         v = (Y_r / Y) * log(Y_r/(Y/R))
         T_m += v
     return T_m, Y
@@ -122,9 +122,19 @@ def sort_regions_by_properties(N):
     dump(out, 'data/sorted_regions.json')
     return out
 
-def get_region_clusters(border_map, region_properties, sorted_regions):
+def calc_neighbours_weight(_neighbours):
     def get_properties(region):
         return np.array([ region_properties[region][x][0] for x in region_properties[region] ])
+
+    neighbours = _neighbours.copy()
+    region = neighbours.pop()
+    rez = get_properties(region) 
+    while neighbours:
+        region = neighbours.pop()    
+        rez += get_properties(region) 
+    return rez
+
+def get_region_clusters(border_map, region_properties, sorted_regions):
     
     def get_neighbours_complexity(current_neighbours):
         rez = 1
@@ -149,15 +159,6 @@ def get_region_clusters(border_map, region_properties, sorted_regions):
                         rez |= {region}
         return rez
         
-    def calc_neighbours_weight(_neighbours):
-        neighbours = _neighbours.copy()
-        region = neighbours.pop()
-        rez = get_properties(region) 
-        while neighbours:
-            region = neighbours.pop()    
-            rez += get_properties(region) 
-        return rez
-    
     regions = [ x[0] for x in sorted_regions ]
     rez = {}
     
@@ -188,7 +189,7 @@ def get_region_clusters(border_map, region_properties, sorted_regions):
                 'состав кластера':sorted(list(neighbours)),
                 'вес кластера': int(weight),
                 'индекс Тейла': T_m,
-                'сумма ВРП по кластеру': Y_m,
+                'подушевой ВРП по кластеру': Y_m,
             }
         })
         print("done")
@@ -196,27 +197,73 @@ def get_region_clusters(border_map, region_properties, sorted_regions):
     return rez
         
 def calc_T_within(region_clusters):
-    Y = sum([ grp[x] for x in grp ])
+    Y = sum([ grp[x] for x in grp ]) / sum([ population[r] for r in population ])
     v = 0
     for cluster in region_clusters:
         T_m = region_clusters[cluster]["индекс Тейла"]
-        Y_m = region_clusters[cluster]["сумма ВРП по кластеру"]
+        Y_m = region_clusters[cluster]["подушевой ВРП по кластеру"]
         v += (T_m * Y_m) / Y
     return v
     
 def calc_T_between(region_clusters):
-    Y = sum([ grp[x] for x in grp ])
+    Y = sum([ grp[x] for x in grp ]) / sum([ population[r] for r in population ])
     R = len(grp.keys())    
     v = 0
     for cluster in region_clusters:
         R_m = len(region_clusters[cluster]['состав кластера'])
         T_m = region_clusters[cluster]["индекс Тейла"]
-        Y_m = region_clusters[cluster]["сумма ВРП по кластеру"]
+        Y_m = region_clusters[cluster]["подушевой ВРП по кластеру"]
         v += Y_m / Y * log((Y_m / R_m) / (Y / R))
     return v
     
 def filter_bad_clusters(region_clusters):
-    pass
+    from itertools import product
+    from pprint import pprint
+    from copy import deepcopy
+    
+    region_clusters = deepcopy(region_clusters)
+    
+    bad_clusters, good_clusters = [], []
+    for cluster in region_clusters.keys():
+        if len(region_clusters[cluster]["состав кластера"]) < 2:
+            bad_clusters += [cluster]
+        else:
+            good_clusters += [cluster]
+
+    variants = {}
+    for good, bad in product(good_clusters, bad_clusters):
+        try_region_clusters = deepcopy(region_clusters[good])
+        x = calc_theil_index(try_region_clusters["состав кластера"])[0]
+        try_region_clusters["состав кластера"] += region_clusters[bad]["состав кластера"]
+        y = calc_theil_index(try_region_clusters["состав кластера"])[0]
+        delta_T = x - y
+        variants.update({(bad, good):delta_T})
+
+    filtered_variants = []
+    for (bad, good), v in variants.items():
+        bad_neighbours = { r[0] for r in border_map[bad] }
+        good_neighbours = set(region_clusters[good]["состав кластера"])
+        if bad_neighbours & good_neighbours:
+            filtered_variants += [(bad, good, v)]
+
+    filtered_variants = sorted(filtered_variants, key=lambda x:x[2])
+    
+    added = []
+    for bad, good, v in filtered_variants:
+        try:
+            assert bad not in added
+            region_clusters[good]['состав кластера'] += [bad]
+            a, b = calc_theil_index(region_clusters[good]['состав кластера'])
+            region_clusters[good]['индекс Тейла'] = a
+            region_clusters[good]['подушевой ВРП по кластеру'] = b
+            region_clusters[good]["вес кластера"] = int(sum(calc_neighbours_weight(region_clusters[good]['состав кластера']) > 0))
+            del region_clusters[bad]
+            added += [bad]
+        except AssertionError:
+            print(bad, 'уже добавлен')
+        except KeyError as s:
+            print(s)
+    return region_clusters
 
 border_map = get_region_border_map()
 region_distance = load_region_distance()
@@ -224,10 +271,16 @@ region_properties = get_region_properties()
 sorted_regions = sort_regions_by_properties(region_properties)
 
 region_clusters = get_region_clusters(border_map, region_properties, sorted_regions)
+
+region_clusters = filter_bad_clusters(region_clusters)
+
 T_within = calc_T_within(region_clusters)
 T_between = calc_T_between(region_clusters)
 
-filtered_region_clusters = filter_bad_clusters(region_clusters)
-
+region_clusters.update(
+    {
+         "T_within": T_within, 
+         "T_between": T_between, 
+    }
+)
 dump(region_clusters, 'data/clusters_out.json')
-
