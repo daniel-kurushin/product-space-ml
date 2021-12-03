@@ -171,12 +171,16 @@ for i in range(len(x)):
     open('/tmp/out_b.csv', 'a').write("\n")
 
 np_comp = ECI[0].sum(axis=0)
-complexity = {}
+list_complexity = []
 i = 0
 for region in regions:
     v = np_comp[i]
-    complexity.update({region:v})
+    list_complexity += [(region,v)]
     i += 1
+    
+complexity = {}
+for reg, v in sorted(list_complexity, key=lambda x: x[1]):
+    complexity.update({reg:v})
     
 dump(complexity, 'data/complexity.json')
 
