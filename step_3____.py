@@ -169,3 +169,15 @@ for i in range(len(x)):
     for j in range(len(x[i])):
         open('/tmp/out_b.csv', 'a').write("^ %s" % x[i,j])
     open('/tmp/out_b.csv', 'a').write("\n")
+
+np_comp = ECI[0].sum(axis=0)
+complexity = {}
+i = 0
+for region in regions:
+    v = np_comp[i]
+    complexity.update({region:v})
+    i += 1
+    
+dump(complexity, 'data/complexity.json')
+
+    
