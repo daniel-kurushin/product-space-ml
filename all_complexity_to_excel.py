@@ -9,6 +9,7 @@ from itertools import product
 LQP = [1, .7, 0.8, 1.5, 2]
 SSP = [.8, .99, .9, .2]
 
+complexity = {}
 
 for lqp, ssp in product(LQP, SSP):
     print('lqp =', lqp, 'ssp =', ssp)
@@ -185,11 +186,18 @@ for lqp, ssp in product(LQP, SSP):
         v = np_comp[i]
         list_complexity += [(region,v)]
         i += 1
-        
-    complexity = {}
+    complexity.update({(lqp,ssp):{}})        
     for reg, v in sorted(list_complexity, key=lambda x: x[1]):
-        complexity.update({reg:v})
+        complexity[(lqp,ssp)].update({reg:v})
+    
+open('/tmp/out.csv', 'w')    
+for r in complexity[(1, 0.8)].keys():
+    s = '"%s"' % r
+    for k in complexity.keys():
+        s += "^" + str(complexity[k][r]).replace('.',',')
+    s += '^\n'
+    open('/tmp/out.csv', 'a').write(s)
         
-    dump(complexity, '/tmp/data/complexity_%s_%s.json' % (lqp, ssp))
+dump(complexity, '/tmp/data/complexity_all.json')
     
     
