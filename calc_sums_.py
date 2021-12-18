@@ -2,8 +2,8 @@ from utilites import load, dump
 from voc import voc
 from itertools import product
 
-LQP = [1, .7, 0.8, 1.5, 2]
-SSP = [.8, .99, .9, .2]
+LQP = [.7]
+SSP = [.9]
 
 data = load('data/normalized_table.json')
 

@@ -8,6 +8,8 @@ from itertools import product
 
 LQP = [1, .7, 0.8, 1.5, 2]
 SSP = [.8, .99, .9, .2]
+LQP = [.7]
+SSP = [.9]
 
 
 for lqp, ssp in product(LQP, SSP):

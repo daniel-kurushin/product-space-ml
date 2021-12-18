@@ -5,7 +5,8 @@ from xlrd import open_workbook
 from math import log
 from data.grp2019_ import grp, population
 
-complexity = load('data/complexity.json')
+#complexity = load('data/complexity.json')
+complexity = load('/tmp/data/complexity_0.7_0.9.json')
 regions = list(complexity.keys())
 
 region_to_region = load('data/region-to-region.json')
