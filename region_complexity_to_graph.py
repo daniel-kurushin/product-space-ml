@@ -97,17 +97,19 @@ for lqp, ssp in product(LQP, SSP):
             subnodes |= set((a,b))
             subgraph += [edge_to_add]
 
-    graph = "digraph g {\n\trankdir=LR\n"
-    for node in nodes:
-        shape = 'none'
-        graph += '\t"%s" [label="%s" shape=%s]\n' % (node, voc[node], shape)
-#        graph += '\t"%s" [label="%s" shape=%s]\n' % (node, wrap(wpt, node), shape)
-
-    for edge in subgraph:
-        a = edge[1]
-        b = edge[2]
-        c = int(12 * Fpp[year][edge[1]][edge[2]] + 1)
-        graph += '\t"%s" -> "%s" [dir=none, penwidth=%s, color=grey]\n' % (a, b, 1)
-    graph += "}\n"
-        
-    open('/tmp/data/graph.g.%s.%s.dot' % (lqp, ssp), 'w').write(graph)
+    for region in regions:
+        graph = "digraph g {\n\trankdir=LR\n"
+        for node in nodes:
+            a_regions = set(get_regions_by_year_industry(year, node))
+            shape = 'circle' if region in a_regions else 'plain'
+            graph += '\t"%s" [label="%s" shape=%s]\n' % (node, voc[node], shape)
+#            graph += '\t"%s" [label="%s" shape=%s]\n' % (node, wrap(wpt, node), shape)
+    
+        for edge in subgraph:
+            a = edge[1]
+            b = edge[2]
+            c = int(12 * Fpp[year][edge[1]][edge[2]] + 1)
+            graph += '\t"%s" -> "%s" [dir=none, penwidth=%s, color=silver]\n' % (a, b, 1)
+        graph += "}\n"
+            
+        open('/tmp/data/graph.%s.dot' % (region.replace(' ','_')), 'w').write(graph)
