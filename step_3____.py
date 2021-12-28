@@ -8,18 +8,20 @@ from itertools import product
 
 LQP = [1, .7, 0.8, 1.5, 2]
 SSP = [.8, .99, .9, .2]
-LQP = [.7]
-SSP = [.9]
+LQP = [0.7]
+SSP = [0.9]
+LQP = [1.0]
+SSP = [0.9]
 
 
 for lqp, ssp in product(LQP, SSP):
     print('lqp =', lqp, 'ssp =', ssp)
     
-    M = load('/tmp/data/M__%s_%s.json' % (lqp, ssp))
+    M = load('data/M__%s_%s.json' % (lqp, ssp))
     ECI = []
     
-    diversity = load('/tmp/data/diversity_%s_%s.json' % (lqp, ssp))
-    ubiquity = load('/tmp/data/ubiquity_%s_%s.json' % (lqp, ssp))
+    diversity = load('data/diversity_%s_%s.json' % (lqp, ssp))
+    ubiquity = load('data/ubiquity_%s_%s.json' % (lqp, ssp))
     
     def set_ones(k_dict):
         rez = deepcopy(k_dict)
@@ -192,6 +194,6 @@ for lqp, ssp in product(LQP, SSP):
     for reg, v in sorted(list_complexity, key=lambda x: x[1]):
         complexity.update({reg:v})
         
-    dump(complexity, '/tmp/data/complexity_%s_%s.json' % (lqp, ssp))
+    dump(complexity, 'data/complexity_%s_%s.json' % (lqp, ssp))
     
     

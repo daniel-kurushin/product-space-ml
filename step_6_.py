@@ -5,6 +5,12 @@ from xlrd import open_workbook
 from math import log
 from data.grp2019_ import grp, population
 
+TRANSPORT = 0.20
+INDUSTRY = 0.17
+EDUCATION = 0.10
+HEALTH = 0.13
+CENTERS_OF_ECONOMIC_GROWTH = 0.40
+
 #complexity = load('data/complexity.json')
 complexity = load('data/complexity_0.7_0.9.json')
 regions = list(complexity.keys())
@@ -67,43 +73,30 @@ def get_region_border_map():
        
 
 def get_region_properties():
-    cluster_data = open_workbook('data/cluster_in_data.xlsx').sheet_by_index(0)
+    cluster_data = open_workbook('data/cluster_in_data_.xlsx').sheet_by_index(0)
     N = {}
     
     for row in range(1, cluster_data.nrows):
         regname = get_reg_name(cluster_data.cell(row, 0).value.lower().strip())
         
-        seaports                   = int(cluster_data.cell(row, 1).value) * 0.00
-        airports                   = int(cluster_data.cell(row, 2).value) * 0.10
-        we_transport_corridor      = int(cluster_data.cell(row, 3).value) * 0.08
-        ns_transport_corridor      = int(cluster_data.cell(row, 4).value) * 0.08
-        
-        ind_parks                  = int(cluster_data.cell(row, 5).value) * 0.05
-        cluster_in_region          = int(cluster_data.cell(row, 6).value) * 0.05
-        sp_econ_zone               = int(cluster_data.cell(row,7).value) * 0.10
-        
-        education_priority_2030    = int(cluster_data.cell(row, 8).value) * 0.10
-        
-        onco_institutions          = int(cluster_data.cell(row, 9).value) * 0.05
-        cardio_centers             = int(cluster_data.cell(row,10).value) * 0.05
-        medical_research_centers_  = int(cluster_data.cell(row, 11).value) * 0.10
-        
-        centers_of_economic_growth = int(cluster_data.cell(row, 12).value) * 0.20    
+        transport = int(cluster_data.cell(row, 1).value) * TRANSPORT 
+        industry  = int(cluster_data.cell(row, 2).value) * INDUSTRY 
+        education = int(cluster_data.cell(row, 3).value) * EDUCATION 
+        health    = int(cluster_data.cell(row, 4).value) * HEALTH 
+        centers_of_economic_growth = int(cluster_data.cell(row, 5).value) * CENTERS_OF_ECONOMIC_GROWTH 
+#Транспортная доступность	
+#Индустрия	
+#Образование	
+#Здравоохранение	
+#Текущие центры экономического роста
           
         N.update({
             regname:
                 {
-                    'Наличие морских портов' : (seaports, "Транспорт"),
-                    'Наличие международных аэропортов' : (airports, "Транспорт"),
-                    'Есть выход к транспортному коридору "Запад-Восток"' : (we_transport_corridor, "Транспорт"),
-                    'Есть выход к транспортному коридору "Север-Юг"' : (ns_transport_corridor, "Транспорт"),
-                    'Индустриальные парки' : (ind_parks, "Пространственное развитие"),
-                    'Кластер' : (cluster_in_region, "Пространственное развитие"),
-                    'Особые экономические зоны' : (sp_econ_zone, "Пространственное развитие"),
-                    'Образование Приоритет 2030' : (education_priority_2030, "Образование"),
-                    'Онкологические учреждения России ' : (onco_institutions, "Здравоохранение"),
-                    'Кардиологические центры' : (cardio_centers, "Здравоохранение"),
-                    'Сеть национальных медицинских исследовательских центров ' : (medical_research_centers_, "Здравоохранение"),
+                    'Транспортная доступность' : (transport, "Транспортная доступность"),
+                    'Индустрия' : (industry, "Индустрия"),
+                    'Образование' : (education, "Образование"),
+                    'Здравоохранение' : (health, "Здравоохранение"),
                     'Текущие центры экономического роста' : (centers_of_economic_growth,"Экономика"),
                 }
             }
@@ -170,7 +163,7 @@ def get_region_clusters(border_map, region_properties, sorted_regions):
         weight = sum(calc_neighbours_weight(neighbours) > 0)
         
         n = 0
-        while ( weight < 11 and n < 20 ) or n < 3:
+        while ( weight < 6 and n < 20 ) or n < 3:
             neighbours |= find_more_neighbours(sample, neighbours, border_map, regions)
             weight = sum(calc_neighbours_weight(neighbours) > 0)
             n += 1
@@ -285,4 +278,4 @@ region_clusters.update(
          "T_between": T_between, 
     }
 )
-dump(region_clusters, 'data/clusters_out.json')
+dump(region_clusters, 'data/clusters_out_07_09_10.json')

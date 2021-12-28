@@ -2,8 +2,11 @@ from utilites import load, dump
 from voc import voc
 from itertools import product
 
-LQP = [.7]
-SSP = [.9]
+LQP = [0.7]
+SSP = [0.9]
+LQP = [1.0]
+SSP = [0.9]
+
 
 data = load('data/normalized_table.json')
 
@@ -77,7 +80,7 @@ for lqp, ssp in product(LQP, SSP):
                     v = 0
                 LQ[year][region].update({industry:v})
                 
-    dump(LQ, '/tmp/data/LQ_%s_%s.json' % (lqp, ssp))
+    dump(LQ, 'data/LQ_%s_%s.json' % (lqp, ssp))
     
     S = {}
     for year in years:
@@ -92,7 +95,7 @@ for lqp, ssp in product(LQP, SSP):
                 v = B2 / A
                 S[year][region].update({industry:v})
                 
-    dump(S, '/tmp/data/S_%s_%s.json' % (lqp, ssp))
+    dump(S, 'data/S_%s_%s.json' % (lqp, ssp))
     
     Ss = {}
     for year in years:
@@ -115,7 +118,7 @@ for lqp, ssp in product(LQP, SSP):
                 n += 1
             Ss[year].update({industry:[ x[0] for x in X]})
     
-    dump(Ss, '/tmp/data/Sss_%s_%s.json' % (lqp, ssp))
+    dump(Ss, 'data/Sss_%s_%s.json' % (lqp, ssp))
     
     M = {}
     for year in LQ:
@@ -129,7 +132,7 @@ for lqp, ssp in product(LQP, SSP):
                 v = sigma_p_region(B12, region, Ss[year][industry], lqp)
                 M[year][region].update({industry:v})
                 
-    dump(M, '/tmp/data/M__%s_%s.json' % (lqp, ssp))
+    dump(M, 'data/M__%s_%s.json' % (lqp, ssp))
     
     ubiquity = {}
     
@@ -144,7 +147,7 @@ for lqp, ssp in product(LQP, SSP):
                 except KeyError:
                     ubiquity[year].update({industry:M[year][region][industry]})
                     
-    dump(ubiquity, '/tmp/data/ubiquity_%s_%s.json' % (lqp, ssp))
+    dump(ubiquity, 'data/ubiquity_%s_%s.json' % (lqp, ssp))
     
     diversity = {}
     
@@ -157,5 +160,5 @@ for lqp, ssp in product(LQP, SSP):
                 except KeyError:
                     diversity[year].update({region:M[year][region][industry]})
                     
-    dump(diversity, '/tmp/data/diversity_%s_%s.json' % (lqp, ssp))
+    dump(diversity, 'data/diversity_%s_%s.json' % (lqp, ssp))
     

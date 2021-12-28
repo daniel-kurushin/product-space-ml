@@ -1,6 +1,8 @@
 from requests import get
 from bs4 import BeautifulSoup as BS
 from utilites import load, dump, compare
+# ^^^ 6
+# Сопоставление индустрий по лингвистическому портрету
 
 regions = load('data/regions.json')
 #distances = load('data/distances.json')

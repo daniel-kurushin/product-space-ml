@@ -1,5 +1,7 @@
 import re
 from xlrd import open_workbook
+# ^^^ 2
+# Извлечение данных из Excel
 
 bd2009_2019 = open_workbook('data/БД2009-2019.a.xls')
 

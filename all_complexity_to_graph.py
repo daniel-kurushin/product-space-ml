@@ -9,14 +9,17 @@ wpt = WordPunctTokenizer()
 
 LQP = [1, .7, 0.8, 1.5, 2]
 SSP = [.8, .99, .9, .2]
-LQP = [.7]
-SSP = [.9]
+LQP = [0.7]
+SSP = [0.9]
+LQP = [1.0]
+SSP = [0.9]
+
 
 for lqp, ssp in product(LQP, SSP):
     print('lqp =', lqp, 'ssp =', ssp)
 
-    M = load('/tmp/data/M__%s_%s.json' % (lqp, ssp))
-    k_p_0 = load('/tmp/data/ubiquity_%s_%s.json' % (lqp, ssp))
+    M = load('data/M__%s_%s.json' % (lqp, ssp))
+    k_p_0 = load('data/ubiquity_%s_%s.json' % (lqp, ssp))
     
     years = M.keys()
     regions = M['2019'].keys()
@@ -51,7 +54,7 @@ for lqp, ssp in product(LQP, SSP):
                 except ZeroDivisionError:
                     Fpp[year][industry_a][industry_b] = 0
             
-    dump(Fpp, '/tmp/data/Fpp_%s_%s.json' % (lqp, ssp))
+    dump(Fpp, 'data/Fpp_%s_%s.json' % (lqp, ssp))
     
     for year in years:
         for industry in industries:
@@ -98,16 +101,16 @@ for lqp, ssp in product(LQP, SSP):
             subgraph += [edge_to_add]
 
     graph = "digraph g {\n\trankdir=LR\n"
-    for node in nodes:
+    for node in sorted(nodes):
         shape = 'none'
         graph += '\t"%s" [label="%s" shape=%s]\n' % (node, voc[node], shape)
 #        graph += '\t"%s" [label="%s" shape=%s]\n' % (node, wrap(wpt, node), shape)
 
-    for edge in subgraph:
+    for edge in sorted(subgraph):
         a = edge[1]
         b = edge[2]
         c = int(12 * Fpp[year][edge[1]][edge[2]] + 1)
         graph += '\t"%s" -> "%s" [dir=none, penwidth=%s, color=grey]\n' % (a, b, 1)
     graph += "}\n"
         
-    open('/tmp/data/graph.g.%s.%s.dot' % (lqp, ssp), 'w').write(graph)
+    open('data/graph.g.%s.%s.dot' % (lqp, ssp), 'w').write(graph)

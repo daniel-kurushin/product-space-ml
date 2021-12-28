@@ -8,6 +8,8 @@ import numpy as np
 from itertools import product
 from utilites import compare_phrase as compare_terms
 from time import sleep
+# ^^^ 3
+# Сопоставление индустрий по лингвистическому портрету
 
 stopterms = {'республика', 'город', 'край'}
 
