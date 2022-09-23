@@ -31,12 +31,21 @@ R = len(out["2010"])
 
 from math import log
 
-for year in ['2018']:
+years = []
+T_ms  = []
+for year in [ str(x) for x in range(2010, 2019)]:
     Y = sum([ v for v in out[year].values() ])
     T_m = 0
     for region in regions:
         Y_r = out[year][region]
         v = (Y_r / Y) * log(Y_r/(Y/R))
-        print(region, v)
+        # print(region, v)
         T_m += v
     print(year, T_m)
+    years += [int(year)]
+    T_ms  += [T_m]
+
+import matplotlib.pyplot as plt
+
+plt.plot(years,T_ms)
+plt.show()
