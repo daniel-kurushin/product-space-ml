@@ -1,0 +1,98 @@
+digraph g {
+    // splines=ortho
+
+	"Контроль данных" [shape=invtrapezium]
+
+	"WEB-интерфейс" [shape=rect]
+
+	"https://html.duckduckgo.com/html/" [shape=parallelogram, label="duckduckgo.com"]
+	"https://ru.distance.to" [shape=parallelogram, label="ru.distance.to"]
+	"https://ru.wikipedia.org/wiki" [shape=parallelogram, label="wikipedia.org"]
+	"https://www.avtodispetcher.ru/distance/?from&to" [shape=parallelogram, label="avtodispetcher.ru"]
+	"https://www.fedstat.ru/" [shape=parallelogram, label="www.fedstat.ru"]
+
+	"data/BD2009-2019.json" [shape=cylinder, label="Исходные данные за\n2009 - 2019 годы"]
+	"data/cluster_in_data.xlsx" [shape=cylinder, label="Данные об объектах\nинфраструктуры"]
+	"data/clusters_out.json" [shape=cylinder, label="Сетка макрорегионов"]
+	"data/complexity.json" [shape=cylinder, label="Индекс сложности"]
+	"data/diversity.json" [shape=cylinder, label="Распространенность отраслей"]
+	"data/M.json" [shape=cylinder, label="Матрица N"]
+	"data/mapping_table_a.json" [shape=cylinder, label="Таблица сопоставления\nназваний отраслей экономики"]
+	"data/mapping_table_region.json" [shape=cylinder, label="Таблица сопоставления\nназваний регионов"]
+	"data/neib85.a.xls" [shape=cylinder, label="Матрица соседства\nрегионов"]
+	"data/normalized_table.json" [shape=cylinder, label="Интегрированные данные\nоб отраслях"]
+	"data/region-to-region.json" [shape=cylinder, label="Таблица сопоставления\nназваний регионов"]
+	"data/region_distance.xls" [shape=cylinder, label="Матрица расстояний\nмежду регионами"]
+	"data/regions.json" [shape=cylinder, label="Интегрированные данные\nо регионах"]
+	"data/ubiquity.json" [shape=cylinder, label="Уникальность отраслей"]
+	"fedstat_data.json" [shape=cylinder, label="Результат извлечения данных Росстата"]
+	"Описания понятий" [shape=cylinder, label="Описания понятий"]
+
+
+	"all_complexity_to_graph.py" [shape=rect label="Построение графа\nсвязности отраслей"]
+	"fedstat.py" [shape=rect, label="Извлечение данных Росстата"]
+	"graph.dot" [shape=parallelogram, label="Серия графов связности\nпо регионам"]
+	"graph.g.dot" [shape=parallelogram, label="Граф связности\nотраслей"]
+	"intell_match" [shape=rect label="Интеллектуальное объединение понятий\n(отрасли экономики и регионы)"]
+	"normalize_table.py" [shape=rect label="Интеграция данных"]
+	"prom_data" [shape=rect label="Формирование\nпромежуточных\nданных"]
+	"prom_data" [shape=rect label="Формирование\nпромежуточных\nданных"]
+	"region_complexity_to_graph.py" [shape=rect label="Определение места региона\nв графе связности"]
+	"regions.py" [shape=rect label="Сборка географических\nданных о регионах"]
+	"step_3.py" [shape=rect label="Вычисление индексов\nсложности регионов"]
+	"step_4.py" [shape=rect label="Вычисление максимального\nостовного дерева"]
+	"step_6.py" [shape=rect label="Имитационное моделирование\nпроцесса идентификации\nмакрорегионов"]
+	
+	"all_complexity_to_graph.py" -> "graph.g.dot"
+	"data/BD2009-2019.json" -> "intell_match"
+	"data/BD2009-2019.json" -> "normalize_table.py"
+	"data/cluster_in_data.xlsx" -> "step_6.py"
+	"data/clusters_out.json" -> "WEB-интерфейс"
+	"data/complexity.json" -> "step_6.py"
+	"data/diversity.json" -> "step_3.py"
+	"data/M.json" -> "all_complexity_to_graph.py"
+	"data/M.json" -> "region_complexity_to_graph.py"
+	"data/M.json" -> "step_3.py"
+	"data/M.json" -> "step_4.py"
+	"data/mapping_table_a.json" -> "normalize_table.py"
+	"data/mapping_table_region.json" -> "normalize_table.py"
+	"data/neib85.a.xls" -> "step_6.py"
+	"data/normalized_table.json" -> "prom_data"
+	"data/region-to-region.json" -> "step_6.py"
+	"data/region_distance.xls" -> "step_6.py"
+	"data/regions.json" -> "regions.py"
+	"data/regions.json" -> "step_6.py"
+	"data/regions.json" -> "Контроль данных"
+	"data/ubiquity.json" -> "all_complexity_to_graph.py"
+	"data/ubiquity.json" -> "region_complexity_to_graph.py"
+	"data/ubiquity.json" -> "step_3.py"
+	"data/ubiquity.json" -> "step_4.py"
+	"fedstat.py" -> "fedstat_data.json"
+	"fedstat_data.json" -> "Контроль данных"
+	"graph.dot" -> "WEB-интерфейс"
+	"graph.g.dot" -> "WEB-интерфейс"
+	"https://html.duckduckgo.com/html/" -> "intell_match"
+	"https://ru.distance.to" -> "regions.py"
+	"https://ru.wikipedia.org/wiki" -> "regions.py"
+	"https://www.avtodispetcher.ru/distance/?from&to" -> "regions.py"
+	"https://www.fedstat.ru/" -> "fedstat.py"
+	"intell_match" -> "Описания понятий"
+	"normalize_table.py" -> "data/normalized_table.json"
+	"prom_data" -> "data/diversity.json"
+	"prom_data" -> "data/M.json"
+	"prom_data" -> "data/ubiquity.json"
+	"region_complexity_to_graph.py" -> "graph.dot"
+	"regions.py" -> "data/region-to-region.json"
+	"regions.py" -> "data/regions.json"
+	"step_3.py" -> "data/complexity.json"
+	"step_4.py" -> "graph.dot"
+	"step_4.py" -> "graph.g.dot"
+	"step_6.py" -> "data/clusters_out.json"
+	"Контроль данных" -> "data/BD2009-2019.json"
+	"Контроль данных" -> "data/cluster_in_data.xlsx"
+	"Контроль данных" -> "data/mapping_table_a.json"
+	"Контроль данных" -> "data/mapping_table_region.json"
+	"Контроль данных" -> "data/neib85.a.xls"
+	"Контроль данных" -> "data/region_distance.xls"
+	"Описания понятий" -> "intell_match"
+}
